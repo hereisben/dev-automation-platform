@@ -11,7 +11,11 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ error: "url is required" });
     }
 
-    const job = await screenshotQueue.add("capture", { url });
+    const job = await screenshotQueue.add(
+      "capture",
+      { url },
+      { attempts: 3, backoff: 5000 },
+    );
 
     return res.status(202).json({
       status: "queued",
