@@ -1,6 +1,7 @@
 import cors from "cors";
 import express from "express";
-import screenshotRoutes from "./routes/screenshotRoutes.js";
+import apiMonitorRoute from "./routes/apiMonitorRoute.js";
+import screenshotRoute from "./routes/screenshotRoute.js";
 
 const app = express();
 
@@ -11,6 +12,7 @@ app.get("/", (req, res) => {
   res.json({ message: "Dev Automation Platform is running" });
 });
 
-app.use("/api/screenshot", screenshotRoutes);
+app.use("/api/screenshot", screenshotRoute);
+app.use("/api/monitors", apiMonitorRoute);
 
 export default app;
