@@ -1,6 +1,7 @@
 import axios from "axios";
 import { Worker } from "bullmq";
 import redis from "../queue/redis.js";
+import generateAIIncidentSummary from "../utils/generateAIIncidentSummary.js";
 import generateIncidentSummary from "../utils/generateIncidentSummary.js";
 
 const apiMonitorWorker = new Worker(
@@ -43,15 +44,32 @@ const apiMonitorWorker = new Worker(
         };
       }
 
-      const incidentSummary =
-        incident === null
-          ? null
-          : generateIncidentSummary({
-              url,
-              statusCode,
-              responseTime,
-              incident,
-            });
+      const bodyPreview =
+        typeof response.data === "string"
+          ? response.data.slice(0, 300)
+          : JSON.stringify(response.data).slice(0, 300);
+
+      let incidentSummary = null;
+
+      if (incident) {
+        try {
+          incidentSummary = await generateAIIncidentSummary({
+            url,
+            statusCode,
+            responseTime,
+            incident,
+            bodyPreview,
+          });
+        } catch (aiError) {
+          console.error(`ai incident summary failed:`, aiError.message);
+          incidentSummary = await generateIncidentSummary({
+            url,
+            statusCode,
+            responseTime,
+            incident,
+          });
+        }
+      }
 
       const result = {
         success: response.status >= 200 && response.status < 400,
@@ -59,31 +77,41 @@ const apiMonitorWorker = new Worker(
         statusCode: response.status,
         responseTime,
         checkedAt: new Date().toISOString(),
-        bodyPreview:
-          typeof response.data === "string"
-            ? response.data.slice(0, 300)
-            : JSON.stringify(response.data).slice(0, 300),
+        bodyPreview,
         incident,
         incidentSummary,
       };
 
       console.log(`api monitor success:`, result);
       return result;
-    } catch (error) {
+    } catch (requestError) {
       const responseTime = Date.now() - start;
 
       const incident = {
         type: "request_error",
         severity: "high",
-        message: error.message,
+        message: requestError.message,
       };
 
-      const incidentSummary = generateIncidentSummary({
-        url,
-        statusCode: null,
-        responseTime,
-        incident,
-      });
+      let incidentSummary = null;
+
+      try {
+        incidentSummary = await generateAIIncidentSummary({
+          url,
+          statusCode: null,
+          responseTime,
+          incident,
+          bodyPreview: null,
+        });
+      } catch (aiError) {
+        console.error(`ai incident summary failed:`, aiError.message);
+        incidentSummary = await generateIncidentSummary({
+          url,
+          statusCode: null,
+          responseTime,
+          incident,
+        });
+      }
 
       const result = {
         success: false,
