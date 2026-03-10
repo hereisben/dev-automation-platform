@@ -1,6 +1,7 @@
 import axios from "axios";
 import { Worker } from "bullmq";
 import redis from "../queue/redis.js";
+import generateIncidentSummary from "../utils/generateIncidentSummary.js";
 
 const apiMonitorWorker = new Worker(
   "apiMonitorQueue",
@@ -42,6 +43,16 @@ const apiMonitorWorker = new Worker(
         };
       }
 
+      const incidentSummary =
+        incident === null
+          ? null
+          : generateIncidentSummary({
+              url,
+              statusCode,
+              responseTime,
+              incident,
+            });
+
       const result = {
         success: response.status >= 200 && response.status < 400,
         url,
@@ -53,12 +64,27 @@ const apiMonitorWorker = new Worker(
             ? response.data.slice(0, 300)
             : JSON.stringify(response.data).slice(0, 300),
         incident,
+        incidentSummary,
       };
 
       console.log(`api monitor success:`, result);
       return result;
     } catch (error) {
       const responseTime = Date.now() - start;
+
+      const incident = {
+        type: "request_error",
+        severity: "high",
+        message: error.message,
+      };
+
+      const incidentSummary = generateIncidentSummary({
+        url,
+        statusCode: null,
+        responseTime,
+        incident,
+      });
+
       const result = {
         success: false,
         url,
@@ -66,11 +92,8 @@ const apiMonitorWorker = new Worker(
         responseTime,
         checkedAt: new Date().toISOString(),
         bodyPreview: null,
-        incident: {
-          type: "request_error",
-          severity: "high",
-          message: error.message,
-        },
+        incident,
+        incidentSummary,
       };
 
       console.error(`api monitor failed:`, result);

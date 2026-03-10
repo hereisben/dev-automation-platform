@@ -56,6 +56,7 @@ router.post("/", async (req, res) => {
       },
     );
 
+    console.log("scheduler created:", schedulerId);
     res.status(201).json({
       message: "API monitor created",
       schedulerId,
