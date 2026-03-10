@@ -19,6 +19,29 @@ const apiMonitorWorker = new Worker(
 
       const responseTime = Date.now() - start;
 
+      const statusCode = response.status;
+      let incident = null;
+
+      if (statusCode >= 500) {
+        incident = {
+          type: "server_error",
+          severity: "high",
+          message: `API returned status ${statusCode}`,
+        };
+      } else if (statusCode >= 400) {
+        incident = {
+          type: "client_error",
+          severity: "medium",
+          message: `API returned status ${statusCode}`,
+        };
+      } else if (responseTime > 3000) {
+        incident = {
+          type: "slow_response",
+          severity: "medium",
+          message: `API was slow: ${responseTime}ms`,
+        };
+      }
+
       const result = {
         success: response.status >= 200 && response.status < 400,
         url,
@@ -26,9 +49,10 @@ const apiMonitorWorker = new Worker(
         responseTime,
         checkedAt: new Date().toISOString(),
         bodyPreview:
-          typeof response.data == "string"
+          typeof response.data === "string"
             ? response.data.slice(0, 300)
             : JSON.stringify(response.data).slice(0, 300),
+        incident,
       };
 
       console.log(`api monitor success:`, result);
@@ -41,11 +65,16 @@ const apiMonitorWorker = new Worker(
         statusCode: null,
         responseTime,
         checkedAt: new Date().toISOString(),
-        error: error.message,
+        bodyPreview: null,
+        incident: {
+          type: "request_error",
+          severity: "high",
+          message: error.message,
+        },
       };
 
       console.error(`api monitor failed:`, result);
-      throw new Error(JSON.stringify(result));
+      return result;
     }
   },
   { connection: redis },
