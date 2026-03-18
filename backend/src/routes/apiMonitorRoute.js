@@ -1,4 +1,5 @@
 import express from "express";
+import pool from "../config/db.js";
 import apiMonitorQueue from "../queue/apiMonitorQueue.js";
 
 function normalizeUrl(inputUrl) {
@@ -38,12 +39,35 @@ router.post("/", async (req, res) => {
   const schedulerId = `monitor:${normalizedUrl}`;
 
   try {
+    const existingMonitorResult = await pool.query(
+      `SELECT id FROM api_monitors WHERE normalized_url = $1`,
+      [normalizedUrl],
+    );
+
+    let monitorId;
+
+    if (existingMonitorResult.rows.length > 0) {
+      monitorId = existingMonitorResult.rows[0].id;
+
+      await pool.query(
+        `UPDATE api_monitors SET interval_seconds = $1 WHERE id = $2`,
+        [intervalSeconds, monitorId],
+      );
+    } else {
+      const insertResult = await pool.query(
+        `INSERT INTO api_monitors (url, normalized_url, interval_seconds) VALUES ($1, $2, $3) RETURNING id`,
+        [url, normalizedUrl, intervalSeconds],
+      );
+
+      monitorId = insertResult.rows[0].id;
+    }
+
     const job = await apiMonitorQueue.upsertJobScheduler(
       schedulerId,
       { every: intervalSeconds * 1000 },
       {
         name: "check-api",
-        data: { url: normalizedUrl },
+        data: { monitorId, url: normalizedUrl },
         opts: {
           attempts: 3,
           backoff: {
@@ -59,7 +83,7 @@ router.post("/", async (req, res) => {
     console.log("scheduler created:", schedulerId);
     res.status(201).json({
       message: "API monitor created",
-      schedulerId,
+      monitorId,
       url: normalizedUrl,
       jobId: job.id,
     });
@@ -73,7 +97,7 @@ router.delete("/", async (req, res) => {
   const { url } = req.body;
 
   if (!url) {
-    return res.json(400).json({ error: `url is required` });
+    return res.status(400).json({ error: `url is required` });
   }
 
   let normalizedUrl;
@@ -81,16 +105,31 @@ router.delete("/", async (req, res) => {
   try {
     normalizedUrl = normalizeUrl(url);
   } catch (error) {
-    return res.json(400).json({ error: `invalid url` });
+    return res.status(400).json({ error: `invalid url` });
   }
 
   const schedulerId = `monitor:${normalizedUrl}`;
 
   try {
+    const result = await pool.query(
+      `SELECT id FROM api_monitors WHERE normalized_url = $1`,
+      [normalizedUrl],
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: `monitor not found` });
+    }
+
+    const monitorId = result.rows[0].id;
+
     await apiMonitorQueue.removeJobScheduler(schedulerId);
     console.log("scheduler removed:", schedulerId);
+
+    await pool.query(`DELETE FROM api_monitors WHERE id = $1`, [monitorId]);
+
     return res.status(200).json({
       message: `API monitor removed`,
+      monitorId,
       schedulerId,
       url: normalizedUrl,
     });
