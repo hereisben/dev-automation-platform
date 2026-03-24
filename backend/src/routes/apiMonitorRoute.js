@@ -15,6 +15,21 @@ function normalizeUrl(inputUrl) {
 
 const router = express.Router();
 
+router.get("/", async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT id, url, normalized_url, interval_seconds, created_at
+      FROM api_monitors
+      ORDER BY created_at DESC
+      `);
+
+    return res.status(200).json(result.rows);
+  } catch (err) {
+    console.error(`failed to fetch monitors:`, err.message);
+    return res.status(500).json({ error: `failed to fetch monitors` });
+  }
+});
+
 router.post("/", async (req, res) => {
   const { url, intervalSeconds } = req.body;
 
