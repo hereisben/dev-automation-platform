@@ -1,13 +1,61 @@
 import axios from "axios";
 import { Worker } from "bullmq";
-import redis from "../queue/redis.js";
+import pool from "../config/db.js";
+import redis from "../config/redis.js";
 import generateAIIncidentSummary from "../utils/generateAIIncidentSummary.js";
 import generateIncidentSummary from "../utils/generateIncidentSummary.js";
+
+async function saveMonitorResult({ monitorId, result }) {
+  const logResult = await pool.query(
+    `INSERT INTO monitor_logs (
+      monitor_id,
+      status_code,
+      response_time,
+      body_preview,
+      success,
+      checked_at
+    )
+    VALUES ($1, $2, $3, $4, $5, $6)
+    RETURNING id`,
+    [
+      monitorId,
+      result.statusCode,
+      result.responseTime,
+      result.bodyPreview,
+      result.success,
+      result.checkedAt,
+    ],
+  );
+
+  const monitorLogId = logResult.rows[0].id;
+
+  if (result.incident) {
+    await pool.query(
+      `INSERT INTO incidents (
+        monitor_id,
+        monitor_log_id,
+        type,
+        severity,
+        message,
+        summary
+      )
+      VALUES ($1, $2, $3, $4, $5, $6)`,
+      [
+        monitorId,
+        monitorLogId,
+        result.incident.type,
+        result.incident.severity,
+        result.incident.message,
+        result.incidentSummary,
+      ],
+    );
+  }
+}
 
 const apiMonitorWorker = new Worker(
   "apiMonitorQueue",
   async (job) => {
-    const { url } = job.data;
+    const { url, monitorId } = job.data;
 
     const start = Date.now();
 
@@ -82,6 +130,7 @@ const apiMonitorWorker = new Worker(
         incidentSummary,
       };
 
+      await saveMonitorResult({ monitorId, result });
       console.log(`api monitor success:`, result);
       return result;
     } catch (requestError) {
@@ -124,6 +173,7 @@ const apiMonitorWorker = new Worker(
         incidentSummary,
       };
 
+      await saveMonitorResult({ monitorId, result });
       console.error(`api monitor failed:`, result);
       return result;
     }

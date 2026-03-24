@@ -30,6 +30,41 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/:id/logs", async (req, res) => {
+  const { id } = req.params;
+  if (!id || Number.isNaN(Number(id))) {
+    return res.status(400).json({ error: `valid monitor id is required` });
+  }
+
+  try {
+    const result = await pool.query(
+      `SELECT
+        ml.id,
+        ml.monitor_id,
+        ml.status_code,
+        ml.response_time,
+        ml.body_preview,
+        ml.success,
+        ml.checked_at,
+        i.type AS incident_type,
+        i.severity AS incident_severity,
+        i.message AS incident_message,
+        i.summary AS incident_summary
+      FROM monitor_logs ml
+      LEFT JOIN incidents i
+        ON ml.id = i.monitor_log_id
+      WHERE ml.monitor_id = $1
+      ORDER BY ml.checked_at DESC`,
+      [id],
+    );
+
+    return res.status(200).json(result.rows);
+  } catch (err) {
+    console.error(`failed to fetch monitor logs:`, err.message);
+    return res.status(500).json({ error: `failed to fetch monitor logs` });
+  }
+});
+
 router.post("/", async (req, res) => {
   const { url, intervalSeconds } = req.body;
 
