@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import express from "express";
 import pool from "../config/db.js";
+import generateToken from "../utils/generateToken.js";
 
 const router = express.Router();
 
@@ -40,6 +41,56 @@ router.post("/register", async (req, res) => {
     console.error(`register error:`, err || err.message);
     return res.status(500).json({
       error: `failed to register user`,
+    });
+  }
+});
+
+router.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({
+      error: `email and password are required`,
+    });
+  }
+
+  try {
+    const result = await pool.query(
+      `SELECT id, name, email, password_hash FROM users WHERE email = $1`,
+      [email],
+    );
+
+    const user = result.rows[0];
+
+    if (!user) {
+      return res.status(401).json({
+        error: `invalid email or password`,
+      });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password_hash);
+
+    if (!isMatch) {
+      return res.status(401).json({
+        error: `invalid email or password`,
+      });
+    }
+
+    const token = generateToken(user);
+
+    return res.status(200).json({
+      message: `login successfully`,
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      },
+    });
+  } catch (err) {
+    console.error(`login error`, err || err.message);
+    return res.status(500).json({
+      error: `failed to login`,
     });
   }
 });
