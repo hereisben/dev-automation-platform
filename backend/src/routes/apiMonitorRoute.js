@@ -1,5 +1,6 @@
 import express from "express";
 import pool from "../config/db.js";
+import authMiddleware from "../middleware/authMiddleware.js";
 import apiMonitorQueue from "../queue/apiMonitorQueue.js";
 
 function normalizeUrl(inputUrl) {
@@ -15,7 +16,7 @@ function normalizeUrl(inputUrl) {
 
 const router = express.Router();
 
-router.get("/", async (req, res) => {
+router.get("/", authMiddleware, async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT id, url, normalized_url, interval_seconds, created_at
