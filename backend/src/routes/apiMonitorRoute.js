@@ -18,11 +18,15 @@ const router = express.Router();
 
 router.get("/", authMiddleware, async (req, res) => {
   try {
-    const result = await pool.query(`
+    const result = await pool.query(
+      `
       SELECT id, url, normalized_url, interval_seconds, created_at
       FROM api_monitors
+      WHERE user_id = $1
       ORDER BY created_at DESC
-      `);
+      `,
+      [req.user.userId],
+    );
 
     return res.status(200).json(result.rows);
   } catch (err) {
