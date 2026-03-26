@@ -1,8 +1,8 @@
 import { Queue } from "bullmq";
-import redis from "../config/redis.js";
+import bullmqConnection from "../config/bullmqConnection.js";
 
 const screenshotQueue = new Queue("screenshotQueue", {
-  connection: redis,
+  connection: bullmqConnection,
 });
 
 export default screenshotQueue;

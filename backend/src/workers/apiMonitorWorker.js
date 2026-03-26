@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Worker } from "bullmq";
+import bullmqConnection from "../config/bullmqConnection.js";
 import pool from "../config/db.js";
-import redis from "../config/redis.js";
 import generateAIIncidentSummary from "../utils/generateAIIncidentSummary.js";
 import generateIncidentSummary from "../utils/generateIncidentSummary.js";
 
@@ -178,7 +178,7 @@ const apiMonitorWorker = new Worker(
       return result;
     }
   },
-  { connection: redis },
+  { connection: bullmqConnection },
 );
 
 apiMonitorWorker.on("completed", (job, result) => {

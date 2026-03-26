@@ -7,21 +7,17 @@ const { Pool } = pg;
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
-pool.on("connect", () => {
-  console.log(`PostgreSQL pool connected`);
-});
-
 pool.on("error", (err) => {
   console.error(`PostgreSQL pool error:`, err);
 });
 
-pool
-  .query("SELECT 1")
-  .then(() => {
-    console.log("Connected to PostgreSQL database:", process.env.DATABASE_URL);
-  })
-  .catch((err) => {
-    console.error("Failed to connect to PostgreSQL:", err.message);
-  });
+export async function testDbConnection() {
+  try {
+    await pool.query(`SELECT 1`);
+    console.log(`PostgreSQL connected`);
+  } catch (err) {
+    console.error(`PostgreSQL connection failed:`, err || err.message);
+  }
+}
 
 export default pool;

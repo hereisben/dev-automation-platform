@@ -2,7 +2,7 @@ import { Worker } from "bullmq";
 import path from "path";
 import puppeteer from "puppeteer";
 import { fileURLToPath } from "url";
-import redis from "../queue/redis.js";
+import bullmqConnection from "../config/bullmqConnection.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -47,7 +47,7 @@ const screenshotWorker = new Worker(
       await browser.close();
     }
   },
-  { connection: redis },
+  { connection: bullmqConnection },
 );
 
 screenshotWorker.on("completed", (job) => {
