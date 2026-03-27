@@ -43,7 +43,7 @@ export default function MonitorLogsDialog({ monitor }: MonitorLogsDialogProps) {
         <Button variant="outline">View Logs</Button>
       </DialogTrigger>
 
-      <DialogContent className="max-w-5xl">
+      <DialogContent className="max-w-5xl w-full">
         <DialogHeader>
           <DialogTitle>Monitor Logs</DialogTitle>
         </DialogHeader>
@@ -64,7 +64,7 @@ export default function MonitorLogsDialog({ monitor }: MonitorLogsDialogProps) {
             No logs yet for this monitor.
           </div>
         ) : (
-          <div className="max-h-[420px] overflow-auto rounded-md border">
+          <div className="max-h-[40vh] overflow-auto rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
