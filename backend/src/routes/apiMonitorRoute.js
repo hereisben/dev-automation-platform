@@ -70,7 +70,7 @@ router.get("/:id/logs", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", authMiddleware, async (req, res) => {
   const { url, intervalSeconds } = req.body;
 
   if (!url) {
@@ -91,12 +91,12 @@ router.post("/", async (req, res) => {
     return res.status(400).json({ error: `invalid url` });
   }
 
-  const schedulerId = `monitor:${normalizedUrl}`;
+  const schedulerId = `monitor:${req.user.userId}:${normalizedUrl}`;
 
   try {
     const existingMonitorResult = await pool.query(
-      `SELECT id FROM api_monitors WHERE normalized_url = $1`,
-      [normalizedUrl],
+      `SELECT id FROM api_monitors WHERE user_id = $1 AND normalized_url = $2`,
+      [req.user.userId, normalizedUrl],
     );
 
     let monitorId;
@@ -110,8 +110,8 @@ router.post("/", async (req, res) => {
       );
     } else {
       const insertResult = await pool.query(
-        `INSERT INTO api_monitors (url, normalized_url, interval_seconds) VALUES ($1, $2, $3) RETURNING id`,
-        [url, normalizedUrl, intervalSeconds],
+        `INSERT INTO api_monitors (user_id ,url, normalized_url, interval_seconds) VALUES ($1, $2, $3) RETURNING id`,
+        [req.user.userId, url, normalizedUrl, intervalSeconds],
       );
 
       monitorId = insertResult.rows[0].id;
