@@ -112,7 +112,7 @@ router.post("/", authMiddleware, async (req, res) => {
       );
     } else {
       const insertResult = await pool.query(
-        `INSERT INTO api_monitors (user_id ,url, normalized_url, interval_seconds) VALUES ($1, $2, $3) RETURNING id`,
+        `INSERT INTO api_monitors (user_id ,url, normalized_url, interval_seconds) VALUES ($1, $2, $3, $4) RETURNING id`,
         [req.user.userId, url, normalizedUrl, intervalSeconds],
       );
 
