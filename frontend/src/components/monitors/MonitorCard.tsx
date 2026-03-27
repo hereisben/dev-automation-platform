@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Monitor } from "../../types/monitor";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
+import MonitorLogsDialog from "./MonitorLogsDialog";
 
 type MonitorCardProps = {
   monitor: Monitor;
@@ -48,7 +49,9 @@ export default function MonitorCard({ monitor }: MonitorCardProps) {
           <p className="text-sm text-red-500">Failed to delete monitor.</p>
         ) : null}
 
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-2">
+          <MonitorLogsDialog monitor={monitor} />
+
           <Button
             variant="destructive"
             onClick={handleDelete}

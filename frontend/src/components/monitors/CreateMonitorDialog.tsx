@@ -1,4 +1,5 @@
 import { api } from "@/lib/api";
+import type { CreateMonitorPayload } from "@/types/monitor";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 import { useState } from "react";
@@ -36,10 +37,12 @@ export default function CreateMonitorDialog() {
         throw new Error(`Interval must be greater than 0`);
       }
 
-      const response = await api.post("/monitors", {
+      const payload: CreateMonitorPayload = {
         url: url.trim(),
         intervalSeconds: interval,
-      });
+      };
+
+      const response = await api.post("/monitors", payload);
 
       return response.data;
     },
