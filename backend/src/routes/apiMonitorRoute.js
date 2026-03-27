@@ -35,7 +35,7 @@ router.get("/", authMiddleware, async (req, res) => {
   }
 });
 
-router.get("/:id/logs", async (req, res) => {
+router.get("/:id/logs", authMiddleware, async (req, res) => {
   const { id } = req.params;
   if (!id || Number.isNaN(Number(id))) {
     return res.status(400).json({ error: `valid monitor id is required` });
@@ -56,11 +56,13 @@ router.get("/:id/logs", async (req, res) => {
         i.message AS incident_message,
         i.summary AS incident_summary
       FROM monitor_logs ml
+      JOIN api_monitors am
+        ON ml.monitor_id = am.id
       LEFT JOIN incidents i
         ON ml.id = i.monitor_log_id
-      WHERE ml.monitor_id = $1
+      WHERE am.user_id = $1 AND ml.monitor_id = $2
       ORDER BY ml.checked_at DESC`,
-      [id],
+      [req.user.userId, id],
     );
 
     return res.status(200).json(result.rows);
