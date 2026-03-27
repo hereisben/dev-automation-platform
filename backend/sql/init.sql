@@ -1,10 +1,11 @@
 CREATE TABLE IF NOT EXISTS api_monitors (
-    id SERIAL PRIMARY KEY,
-    url TEXT NOT NULL UNIQUE,
-    normalized_url TEXT NOT NULL UNIQUE,
-    interval_seconds INTEGER NOT NULL,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    created_at TIMESTAMP DEFAULT NOW()
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  url TEXT NOT NULL,
+  normalized_url TEXT NOT NULL,
+  interval_seconds INTEGER NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE (user_id, normalized_url)
 );
 
 CREATE TABLE IF NOT EXISTS monitor_logs (
