@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS api_monitors (
   id SERIAL PRIMARY KEY,
-  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  user_id NOT NUll INTEGER REFERENCES users(id) ON DELETE CASCADE,
   url TEXT NOT NULL,
   normalized_url TEXT NOT NULL,
   interval_seconds INTEGER NOT NULL,
