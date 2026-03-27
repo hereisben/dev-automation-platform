@@ -19,3 +19,8 @@ export type MonitorLog = {
   incident_message: string | null;
   incident_summary: string | null;
 };
+
+export type CreateMonitorPayload = {
+  url: string;
+  intervalSeconds: number;
+};
