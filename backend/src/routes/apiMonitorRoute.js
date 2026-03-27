@@ -148,7 +148,7 @@ router.post("/", authMiddleware, async (req, res) => {
   }
 });
 
-router.delete("/", async (req, res) => {
+router.delete("/", authMiddleware, async (req, res) => {
   const { url } = req.body;
 
   if (!url) {
@@ -163,12 +163,12 @@ router.delete("/", async (req, res) => {
     return res.status(400).json({ error: `invalid url` });
   }
 
-  const schedulerId = `monitor:${normalizedUrl}`;
+  const schedulerId = `monitor:${req.user.userId}:${normalizedUrl}`;
 
   try {
     const result = await pool.query(
-      `SELECT id FROM api_monitors WHERE normalized_url = $1`,
-      [normalizedUrl],
+      `SELECT id FROM api_monitors WHERE user_id = $1 AND normalized_url = $2`,
+      [req.user.userId, normalizedUrl],
     );
 
     if (result.rows.length === 0) {
@@ -180,7 +180,10 @@ router.delete("/", async (req, res) => {
     await apiMonitorQueue.removeJobScheduler(schedulerId);
     console.log("scheduler removed:", schedulerId);
 
-    await pool.query(`DELETE FROM api_monitors WHERE id = $1`, [monitorId]);
+    await pool.query(
+      `DELETE FROM api_monitors WHERE user_id = $1 AND id = $2`,
+      [req.user.userId, monitorId],
+    );
 
     return res.status(200).json({
       message: `API monitor removed`,
