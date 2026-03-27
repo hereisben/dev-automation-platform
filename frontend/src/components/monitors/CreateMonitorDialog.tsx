@@ -1,5 +1,6 @@
 import { api } from "@/lib/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { AxiosError } from "axios";
 import { useState } from "react";
 import { Button } from "../ui/button";
 import {
@@ -10,6 +11,10 @@ import {
   DialogTrigger,
 } from "../ui/dialog";
 
+type ApiError = {
+  error?: string;
+};
+
 export default function CreateMonitorDialog() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -17,7 +22,7 @@ export default function CreateMonitorDialog() {
   const [intervalSeconds, setIntervalSeconds] = useState("60");
   const [formError, setFormError] = useState("");
 
-  const createMonitorMutataion = useMutation({
+  const createMonitorMutation = useMutation({
     mutationFn: async () => {
       setFormError("");
 
@@ -45,7 +50,7 @@ export default function CreateMonitorDialog() {
       setFormError("");
       queryClient.invalidateQueries({ queryKey: ["monitors"] });
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<ApiError>) => {
       const message =
         error?.response?.data?.error ||
         error?.message ||
@@ -56,7 +61,7 @@ export default function CreateMonitorDialog() {
   });
 
   const handleSubmit = () => {
-    createMonitorMutataion.mutate();
+    createMonitorMutation.mutate();
   };
 
   return (
@@ -99,12 +104,10 @@ export default function CreateMonitorDialog() {
 
           <Button
             onClick={handleSubmit}
-            disabled={createMonitorMutataion.isPending}
+            disabled={createMonitorMutation.isPending}
             className="w-full"
           >
-            {createMonitorMutataion.isPending
-              ? "Creating..."
-              : "Create Monitor"}
+            {createMonitorMutation.isPending ? "Creating..." : "Create Monitor"}
           </Button>
         </div>
       </DialogContent>
