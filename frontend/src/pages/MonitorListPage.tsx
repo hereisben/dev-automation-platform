@@ -3,8 +3,11 @@ import MonitorCard from "@/components/monitors/MonitorCard";
 import { api } from "@/lib/api";
 import type { Monitor } from "@/types/monitor";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 
 export default function MonitorListPage() {
+  const navigate = useNavigate();
+
   const { data, isLoading, error } = useQuery({
     queryKey: ["monitors"],
     queryFn: async () => {
@@ -18,11 +21,24 @@ export default function MonitorListPage() {
 
   const monitors = data || [];
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/login");
+  };
+
   return (
     <div className="p-10 space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">API Monitors</h1>
-        <CreateMonitorDialog />
+        <div className="flex justify-between items-center space-x-2">
+          <CreateMonitorDialog />
+          <button
+            onClick={handleLogout}
+            className="rounded-md border px-4 py-2"
+          >
+            Logout
+          </button>
+        </div>
       </div>
 
       {monitors.length === 0 ? (
