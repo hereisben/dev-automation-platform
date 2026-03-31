@@ -1,4 +1,4 @@
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthContext } from "@/hooks/useAuthContext";
 import { Navigate } from "react-router-dom";
 
 type ProtectedRouteProps = {
@@ -6,19 +6,13 @@ type ProtectedRouteProps = {
 };
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const token = localStorage.getItem("token");
-  const { isLoading, isError } = useAuth();
-
-  if (!token) {
-    return <Navigate to="/login" replace />;
-  }
+  const { isLoading, isAuthenticated } = useAuthContext();
 
   if (isLoading) {
     return <div className="p-10">Checking auth...</div>;
   }
 
-  if (isError) {
-    localStorage.removeItem("token");
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 

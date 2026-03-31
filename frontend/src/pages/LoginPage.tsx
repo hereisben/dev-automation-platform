@@ -1,3 +1,4 @@
+import { useAuthContext } from "@/hooks/useAuthContext";
 import { api } from "@/lib/api";
 import axios from "axios";
 import { useState } from "react";
@@ -5,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { login } = useAuthContext();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -30,7 +32,7 @@ export default function LoginPage() {
 
       const token = response.data.token;
 
-      localStorage.setItem("token", token);
+      await login(token);
 
       navigate("/");
     } catch (err: unknown) {

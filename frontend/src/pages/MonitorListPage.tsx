@@ -1,5 +1,6 @@
 import CreateMonitorDialog from "@/components/monitors/CreateMonitorDialog";
 import MonitorCard from "@/components/monitors/MonitorCard";
+import { useAuthContext } from "@/hooks/useAuthContext";
 import { api } from "@/lib/api";
 import type { Monitor } from "@/types/monitor";
 import { useQuery } from "@tanstack/react-query";
@@ -7,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function MonitorListPage() {
   const navigate = useNavigate();
+  const { logout } = useAuthContext();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["monitors"],
@@ -22,7 +24,7 @@ export default function MonitorListPage() {
   const monitors = data || [];
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    logout();
     navigate("/login");
   };
 
