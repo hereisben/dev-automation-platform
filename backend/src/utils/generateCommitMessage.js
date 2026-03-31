@@ -1,29 +1,33 @@
 import groq from "../lib/groq.js";
 
 async function generateCommitMessage(diff) {
-  const prompt = `You must generate a git commit message in exactly this format and not use any other format.
+  const prompt = `
+    You must generate a git commit message in EXACTLY this format.
 
-    Line 1:
+    DO NOT add any extra sections.
+    DO NOT include the git diff in the output.
+    DO NOT add explanations.
+
+    FORMAT:
+
     <type>: <short summary>
 
-    Line 2:
     <longer description explaining what changed and why>
 
-    Line 3:
     Changed files/modules:
     - <file1>
     - <file2>
 
-    Line 4:
     Notes:
     <optional notes>
 
-    Rules:
-    - Do not omit section headers
-    - Do not use markdown code fences
-    - Do not use any format other than the one above
-    - Use conventional commit types like feat, fix, refactor, docs, chore
-    - Keep the short summary under 72 characters
+    RULES:
+    - Strictly follow the format above
+    - Do not add "Git diff" section
+    - Do not include code blocks
+    - Do not include anything outside the format
+    - Use conventional commit types (feat, fix, refactor, docs, chore)
+    - Keep short summary under 72 characters
 
     Git diff:
     ${diff}
