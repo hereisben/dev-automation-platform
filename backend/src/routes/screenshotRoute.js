@@ -30,4 +30,50 @@ router.post("/", async (req, res) => {
   }
 });
 
+router.get("/:jobId", async (req, res) => {
+  try {
+    const { jobId } = req.params;
+
+    const job = await screenshotQueue.getJob(jobId);
+
+    if (!job) {
+      return res.status(404).json({
+        error: `screenshot job not found`,
+      });
+    }
+
+    const state = await job.getState();
+
+    if (state === "completed") {
+      const result = job.returnvalue;
+
+      return res.json({
+        status: "completed",
+        jobId: job.id,
+        fileName: result.fileName,
+        filePath: result.filePath,
+        imageUrl: `/screenshots/${result.fileName}`,
+      });
+    }
+
+    if (state === "failed") {
+      return res.json({
+        status: "failed",
+        jobId: job.id,
+        error: job.failedReason || "screenshot job failed",
+      });
+    }
+
+    return res.json({
+      status: state,
+      jobId: job.id,
+    });
+  } catch (err) {
+    console.error(`failed to get screenshot job:`, err);
+    return res.status(500).json({
+      error: `failed to fetch screenshot job status`,
+    });
+  }
+});
+
 export default router;

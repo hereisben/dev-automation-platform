@@ -4,6 +4,7 @@ import PublicRoute from "./components/auth/PublicRoute";
 import CommitGeneratorPage from "./pages/CommitGeneratePage";
 import LoginPage from "./pages/LoginPage";
 import MonitorListPage from "./pages/MonitorListPage";
+import ScreenshotPage from "./pages/ScreenshotPage";
 
 function App() {
   return (
@@ -75,6 +76,14 @@ function App() {
           element={
             <ProtectedRoute>
               <CommitGeneratorPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/screenshot"
+          element={
+            <ProtectedRoute>
+              <ScreenshotPage />
             </ProtectedRoute>
           }
         />

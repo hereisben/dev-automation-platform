@@ -1,5 +1,7 @@
 import cors from "cors";
 import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
 import apiMonitorRoute from "./routes/apiMonitorRoute.js";
 import authRoute from "./routes/authRoute.js";
 import commitRoute from "./routes/commitRoute.js";
@@ -13,6 +15,11 @@ app.use(express.json());
 app.get("/", (req, res) => {
   res.json({ message: "Dev Automation Platform is running" });
 });
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.use("/screenshots", express.static(path.join(__dirname, "../screenshots")));
 
 app.use("/api/auth", authRoute);
 app.use("/api/screenshot", screenshotRoute);
