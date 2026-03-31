@@ -2,6 +2,7 @@ import cors from "cors";
 import express from "express";
 import apiMonitorRoute from "./routes/apiMonitorRoute.js";
 import authRoute from "./routes/authRoute.js";
+import commitRoute from "./routes/commitRoute.js";
 import screenshotRoute from "./routes/screenshotRoute.js";
 
 const app = express();
@@ -16,5 +17,6 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoute);
 app.use("/api/screenshot", screenshotRoute);
 app.use("/api/monitors", apiMonitorRoute);
+app.use("/api/commit", commitRoute);
 
 export default app;

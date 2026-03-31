@@ -131,7 +131,6 @@ const apiMonitorWorker = new Worker(
       };
 
       await saveMonitorResult({ monitorId, result });
-      console.log(`api monitor success:`, result);
       return result;
     } catch (requestError) {
       const responseTime = Date.now() - start;
@@ -174,7 +173,6 @@ const apiMonitorWorker = new Worker(
       };
 
       await saveMonitorResult({ monitorId, result });
-      console.error(`api monitor failed:`, result);
       return result;
     }
   },
@@ -182,13 +180,21 @@ const apiMonitorWorker = new Worker(
 );
 
 apiMonitorWorker.on("completed", (job, result) => {
-  console.log(`api monitor completed: ${job.id}`);
-  console.log(result);
+  console.log(`api monitor completed`, {
+    jobId: job.id,
+    url: result.url,
+    statusCode: result.statusCode,
+    responseTime: result.responseTime,
+    success: result.success,
+    incident: result.incident?.type || null,
+  });
 });
 
 apiMonitorWorker.on("failed", (job, error) => {
-  console.error(`api monitor failed: ${job?.id}`);
-  console.error(error.message);
+  console.error(`api monitor worker failed`, {
+    jobId: job?.id,
+    message: error.message,
+  });
 });
 
 export default apiMonitorWorker;

@@ -73,7 +73,7 @@ export default function CreateMonitorDialog() {
         <Button>Add Monitor</Button>
       </DialogTrigger>
 
-      <DialogContent>
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Create API Monitor</DialogTitle>
         </DialogHeader>
