@@ -16,7 +16,10 @@ const screenshotWorker = new Worker(
 
     console.log(`processing screenshot job for: ${url}`);
 
-    const browser = await puppeteer.launch({ headless: true });
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    });
 
     try {
       const page = await browser.newPage();
