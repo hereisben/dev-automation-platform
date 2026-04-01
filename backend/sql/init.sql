@@ -1,6 +1,14 @@
+CREATE TABLE IF NOT EXISTS users(
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
 CREATE TABLE IF NOT EXISTS api_monitors (
   id SERIAL PRIMARY KEY,
-  user_id NOT NUll INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   url TEXT NOT NULL,
   normalized_url TEXT NOT NULL,
   interval_seconds INTEGER NOT NULL,
@@ -28,12 +36,4 @@ CREATE TABLE IF NOT EXISTS incidents(
     message TEXT NOT NULL,
     summary TEXT,
     created_at TIMESTAMP DEFAULT NOW() 
-);
-
-CREATE TABLE IF NOT EXISTS users(
-    id SERIAL PRIMARY KEY,
-    name TEXT NOT NULL,
-    email TEXT NOT NULL UNIQUE,
-    password_hash TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW()
 );
