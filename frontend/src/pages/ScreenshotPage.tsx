@@ -27,6 +27,8 @@ export default function ScreenshotPage() {
   const [jobStatus, setJobStatus] = useState("");
   const [imageUrl, setImageUrl] = useState("");
 
+  const baseUrl = import.meta.env.VITE_BASE_URL;
+
   const handleSubmit = async () => {
     setError("");
     setResult(null);
@@ -73,7 +75,7 @@ export default function ScreenshotPage() {
         setJobStatus(data.status);
 
         if (data.status === "completed") {
-          setImageUrl(`http://localhost:3000${data.imageUrl}`);
+          setImageUrl(`${baseUrl}${data.imageUrl}`);
           clearInterval(intervalId);
         }
 
