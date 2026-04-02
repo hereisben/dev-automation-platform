@@ -4,6 +4,8 @@ import authMiddleware from "../middleware/authMiddleware.js";
 import { monitorCreateLimiter } from "../middleware/rateLimiters.js";
 import apiMonitorQueue from "../queue/apiMonitorQueue.js";
 
+const MAX_MONITORS_PER_USER = 20;
+
 function normalizeUrl(inputUrl) {
   const parsedUrl = new URL(inputUrl);
   parsedUrl.hostname = parsedUrl.hostname.toLowerCase();
@@ -17,7 +19,7 @@ function normalizeUrl(inputUrl) {
 
 const router = express.Router();
 
-router.get("/", authMiddleware, monitorCreateLimiter, async (req, res) => {
+router.get("/", authMiddleware, async (req, res) => {
   try {
     const result = await pool.query(
       `
@@ -73,7 +75,7 @@ router.get("/:id/logs", authMiddleware, async (req, res) => {
   }
 });
 
-router.post("/", authMiddleware, async (req, res) => {
+router.post("/", authMiddleware, monitorCreateLimiter, async (req, res) => {
   const { url, intervalSeconds } = req.body;
 
   if (!url) {
@@ -111,7 +113,27 @@ router.post("/", authMiddleware, async (req, res) => {
         `UPDATE api_monitors SET interval_seconds = $1 WHERE id = $2`,
         [intervalSeconds, monitorId],
       );
+
+      return res.status(200).json({
+        message: "API monitor updated",
+        monitorId,
+        url: normalizedUrl,
+        jobId: job.id,
+      });
     } else {
+      const countResult = await pool.query(
+        `SELECT COUNT(*) FROM api_monitors WHERE user_id = $1`,
+        [req.user.userId],
+      );
+
+      const currentCount = Number(countResult.rows[0].count);
+
+      if (currentCount >= MAX_MONITORS_PER_USER) {
+        return res.status(400).json({
+          error: `You have reached the maximum number of monitors.`,
+        });
+      }
+
       const insertResult = await pool.query(
         `INSERT INTO api_monitors (user_id ,url, normalized_url, interval_seconds) VALUES ($1, $2, $3, $4) RETURNING id`,
         [req.user.userId, url, normalizedUrl, intervalSeconds],
