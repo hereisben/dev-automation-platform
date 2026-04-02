@@ -28,6 +28,9 @@ async function generateCommitMessage(diff) {
     - Do not include anything outside the format
     - Use conventional commit types (feat, fix, refactor, docs, chore)
     - Keep short summary under 72 characters
+    - If the input does not look like a real git diff or does not contain enough concrete file changes, do not guess.
+Return exactly:
+Unable to generate a reliable commit message from the provided diff. Please paste a real git diff.
 
     Git diff:
     ${diff}

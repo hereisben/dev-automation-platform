@@ -14,6 +14,24 @@ router.post("/generate", authMiddleware, commitLimiter, async (req, res) => {
       });
     }
 
+    const looksLikeGitDiff =
+      diff.includes("diff --git") ||
+      diff.includes("---") ||
+      diff.includes("+++") ||
+      diff.includes("@@");
+
+    if (!looksLikeGitDiff) {
+      return res.status(400).json({
+        error: "Please provide a real git diff",
+      });
+    }
+
+    if (diff.length < 50) {
+      return res.status(400).json({
+        error: "Git diff is too short to generate a reliable commit message",
+      });
+    }
+
     if (diff.length > 20000) {
       return res.status(400).json({
         error: `diff is too long`,
