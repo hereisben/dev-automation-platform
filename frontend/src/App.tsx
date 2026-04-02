@@ -1,7 +1,7 @@
 import { NavLink, Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import PublicRoute from "./components/auth/PublicRoute";
-import CommitGeneratorPage from "./pages/CommitGeneratePage";
+import CommitGeneratorPage from "./pages/CommitGeneratorPage";
 import LoginPage from "./pages/LoginPage";
 import MonitorListPage from "./pages/MonitorListPage";
 import ScreenshotPage from "./pages/ScreenshotPage";
