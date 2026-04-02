@@ -9,13 +9,37 @@ router.post("/", authMiddleware, screenshotLimiter, async (req, res) => {
   try {
     const { url } = req.body;
 
-    if (!url) {
+    if (!url || url.trim() === "") {
       return res.status(400).json({ error: "url is required" });
+    }
+
+    const jobs = await screenshotQueue.getJobs([
+      "waiting",
+      "active",
+      "delayed",
+    ]);
+
+    const userJobsInProgress = jobs.filter(
+      (job) => job.data.userId === req.user.userId,
+    );
+
+    if (userJobsInProgress.length >= 2) {
+      return res.status(429).json({
+        error: `You already have too many screenshot jobs in progress.`,
+      });
+    }
+
+    const duplicateJob = userJobsInProgress.find((job) => job.data.url === url);
+
+    if (duplicateJob) {
+      return res.status(409).json({
+        error: `A screenshot job for this URL is already in progress.`,
+      });
     }
 
     const job = await screenshotQueue.add(
       "capture",
-      { url },
+      { url, userId: req.user.userId },
       { attempts: 3, backoff: 5000 },
     );
 
@@ -41,6 +65,12 @@ router.get("/:jobId", authMiddleware, async (req, res) => {
     if (!job) {
       return res.status(404).json({
         error: `screenshot job not found`,
+      });
+    }
+
+    if (job.data.userId !== req.user.userId) {
+      return res.status(403).json({
+        error: `You do not have access to this screenshot job.`,
       });
     }
 
