@@ -1,9 +1,10 @@
 import express from "express";
 import authMiddleware from "../middleware/authMiddleware.js";
+import { commitLimiter } from "../middleware/rateLimiters.js";
 import generateCommitMessage from "../utils/generateCommitMessage.js";
 const router = express.Router();
 
-router.post("/generate", authMiddleware, async (req, res) => {
+router.post("/generate", authMiddleware, commitLimiter, async (req, res) => {
   try {
     const { diff } = req.body;
 

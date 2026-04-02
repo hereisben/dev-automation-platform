@@ -1,6 +1,7 @@
 import express from "express";
 import pool from "../config/db.js";
 import authMiddleware from "../middleware/authMiddleware.js";
+import { monitorCreateLimiter } from "../middleware/rateLimiters.js";
 import apiMonitorQueue from "../queue/apiMonitorQueue.js";
 
 function normalizeUrl(inputUrl) {
@@ -16,7 +17,7 @@ function normalizeUrl(inputUrl) {
 
 const router = express.Router();
 
-router.get("/", authMiddleware, async (req, res) => {
+router.get("/", authMiddleware, monitorCreateLimiter, async (req, res) => {
   try {
     const result = await pool.query(
       `

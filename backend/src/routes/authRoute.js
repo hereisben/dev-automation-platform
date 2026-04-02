@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import express from "express";
 import pool from "../config/db.js";
 import authMiddleware from "../middleware/authMiddleware.js";
+import { authLimiter } from "../middleware/rateLimiters.js";
 import generateToken from "../utils/generateToken.js";
 
 const router = express.Router();
@@ -30,7 +31,7 @@ router.get("/me", authMiddleware, async (req, res) => {
   }
 });
 
-router.post("/register", async (req, res) => {
+router.post("/register", authLimiter, async (req, res) => {
   const { name, password, email } = req.body;
 
   if (!name || !password || !email) {
@@ -70,7 +71,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-router.post("/login", async (req, res) => {
+router.post("/login", authLimiter, async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {

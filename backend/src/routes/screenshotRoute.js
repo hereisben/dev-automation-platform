@@ -1,9 +1,11 @@
 import express from "express";
+import authMiddleware from "../middleware/authMiddleware.js";
+import { screenshotLimiter } from "../middleware/rateLimiters.js";
 import screenshotQueue from "../queue/screenshotQueue.js";
 
 const router = express.Router();
 
-router.post("/", async (req, res) => {
+router.post("/", authMiddleware, screenshotLimiter, async (req, res) => {
   try {
     const { url } = req.body;
 
@@ -30,7 +32,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.get("/:jobId", async (req, res) => {
+router.get("/:jobId", authMiddleware, async (req, res) => {
   try {
     const { jobId } = req.params;
 
