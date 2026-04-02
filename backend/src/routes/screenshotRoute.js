@@ -45,14 +45,14 @@ router.get("/:jobId", async (req, res) => {
     const state = await job.getState();
 
     if (state === "completed") {
-      const result = job.returnvalue;
+      const result = job.returnvalue || {};
 
       return res.json({
         status: "completed",
         jobId: job.id,
-        fileName: result.fileName,
-        filePath: result.filePath,
-        imageUrl: `/screenshots/${result.fileName}`,
+        fileName: result.fileName ?? null,
+        key: result.key ?? null,
+        imageUrl: result.imageUrl ?? null,
       });
     }
 

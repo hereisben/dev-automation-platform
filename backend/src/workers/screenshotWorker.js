@@ -1,13 +1,11 @@
+import dotenv from "dotenv";
+dotenv.config();
+
+import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { Worker } from "bullmq";
-import path from "path";
 import puppeteer from "puppeteer";
-import { fileURLToPath } from "url";
 import bullmqConnection from "../config/bullmqConnection.js";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const __screenshotDir = path.join(__dirname, "../../screenshots");
+import s3 from "../config/s3.js";
 
 const screenshotWorker = new Worker(
   "screenshotQueue",
@@ -32,16 +30,31 @@ const screenshotWorker = new Worker(
       await page.goto(url, { waitUntil: "networkidle2", timeout: 30000 });
 
       const fileName = `screenshot-${job.id}.png`;
-      const filePath = path.join(__screenshotDir, fileName);
+      const key = `screenshots/${fileName}`;
 
-      await page.screenshot({ path: filePath, fullPage: true });
+      const screenshotBuffer = await page.screenshot({
+        type: "png",
+        fullPage: true,
+      });
 
-      console.log(`screenshot saved: ${filePath}`);
+      await s3.send(
+        new PutObjectCommand({
+          Bucket: process.env.AWS_S3_BUCKET,
+          Key: key,
+          Body: screenshotBuffer,
+          ContentType: "image/png",
+        }),
+      );
+
+      const imageUrl = `https://${process.env.AWS_S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+
+      console.log(`screenshot uploaded to S3: ${imageUrl}`);
 
       return {
         success: true,
         fileName,
-        filePath,
+        key,
+        imageUrl,
       };
     } catch (error) {
       console.error(`screenshot job ${job.id} failed:`, error.message);

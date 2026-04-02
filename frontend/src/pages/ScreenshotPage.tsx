@@ -13,9 +13,9 @@ type ScreenshotResponse = {
 type ScreenshotStatusResponse = {
   status: string;
   jobId: string;
-  fileName?: string;
-  filePath?: string;
-  imageUrl?: string;
+  fileName?: string | null;
+  key?: string | null;
+  imageUrl?: string | null;
   error?: string;
 };
 
@@ -26,8 +26,6 @@ export default function ScreenshotPage() {
   const [result, setResult] = useState<ScreenshotResponse | null>(null);
   const [jobStatus, setJobStatus] = useState("");
   const [imageUrl, setImageUrl] = useState("");
-
-  const baseUrl = import.meta.env.VITE_BASE_URL;
 
   const handleSubmit = async () => {
     setError("");
@@ -75,7 +73,7 @@ export default function ScreenshotPage() {
         setJobStatus(data.status);
 
         if (data.status === "completed") {
-          setImageUrl(`${baseUrl}${data.imageUrl}`);
+          setImageUrl(`${data.imageUrl}`);
           clearInterval(intervalId);
         }
 
