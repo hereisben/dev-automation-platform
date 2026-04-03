@@ -128,7 +128,7 @@ export default function CommitGeneratorPage() {
           </div>
 
           {result ? (
-            <pre className="overflow-x-auto rounded-lg border bg-muted/40 p-4 text-sm whitespace-pre-wrap break-words">
+            <pre className="overflow-x-auto rounded-lg border bg-muted/40 p-4 text-sm whitespace-pre-wrap break-word">
               {result}
             </pre>
           ) : (
