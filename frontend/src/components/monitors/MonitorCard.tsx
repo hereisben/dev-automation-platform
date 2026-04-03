@@ -66,7 +66,7 @@ export default function MonitorCard({ monitor }: MonitorCardProps) {
             </a>
           </div>
 
-          <p className="text-xs text-muted-foreground truncate">
+          <p className="mt-2 text-xs text-muted-foreground truncate">
             {monitor.url}
           </p>
         </div>

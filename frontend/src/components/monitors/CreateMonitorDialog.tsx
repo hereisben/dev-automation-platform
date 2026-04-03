@@ -70,7 +70,14 @@ export default function CreateMonitorDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Add Monitor</Button>
+        <Button
+          className="
+    transition-all duration-200
+    hover:shadow-md
+    hover:-translate-y-0.5"
+        >
+          Add Monitor
+        </Button>
       </DialogTrigger>
 
       <DialogContent className="max-w-2xl">
@@ -82,7 +89,7 @@ export default function CreateMonitorDialog() {
           <div className="space-y-2">
             <label className="text-sm font-medium">API URL</label>
             <input
-              className="w-full rounded-md border px-3 py-2 text-sm"
+              className="w-full rounded-md border px-3 py-2 text-sm mt-2"
               type="text"
               placeholder="https://api.example.com/health"
               value={url}
@@ -93,7 +100,7 @@ export default function CreateMonitorDialog() {
           <div className="space-y-2">
             <label className="text-sm font-medium">Interval (seconds)</label>
             <input
-              className="w-full rounded-md border px-3 py-2 text-sm"
+              className="w-full rounded-md border px-3 py-2 text-sm mt-2"
               type="number"
               min={10}
               value={intervalSeconds}

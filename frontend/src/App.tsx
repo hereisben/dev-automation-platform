@@ -15,7 +15,9 @@ function App() {
         style={{ backgroundColor: "oklch(0.24 0.03 220 / 0.85)" }}
       >
         <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
-          <div className="text-lg font-bold">Dev Automation</div>
+          <div className="text-lg font-bold">
+            <NavLink to="/">Dev Automation</NavLink>
+          </div>
           <div className="flex gap-2">
             <NavLink
               to="/"

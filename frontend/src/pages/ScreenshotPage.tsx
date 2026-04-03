@@ -104,7 +104,7 @@ export default function ScreenshotPage() {
         <CardContent className="space-y-4 p-6">
           <div>
             <h1 className="text-2xl font-bold">Screenshot Capture</h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="mt-2 text-sm text-muted-foreground">
               Enter a URL to queue a screenshot job.
             </p>
           </div>
