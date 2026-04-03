@@ -10,7 +10,10 @@ function App() {
   return (
     <div>
       {/* NAVBAR */}
-      <div className="border-b bg-white shadow-sm">
+      <div
+        className="sticky top-0 z-50 border-b border-border backdrop-blur"
+        style={{ backgroundColor: "oklch(0.24 0.03 220 / 0.85)" }}
+      >
         <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
           <div className="text-lg font-bold">Dev Automation</div>
           <div className="flex gap-2">
@@ -20,7 +23,7 @@ function App() {
                 `px-3 py-1.5 rounded-md text-sm font-medium transition ${
                   isActive
                     ? "bg-black text-white"
-                    : "text-gray-600 hover:bg-gray-100"
+                    : "text-gray-300 hover:bg-gray-100 hover:text-black"
                 }`
               }
             >
@@ -32,7 +35,7 @@ function App() {
                 `px-3 py-1.5 rounded-md text-sm font-medium transition ${
                   isActive
                     ? "bg-black text-white"
-                    : "text-gray-600 hover:bg-gray-100"
+                    : "text-gray-300 hover:bg-gray-100 hover:text-black"
                 }`
               }
             >
@@ -45,7 +48,7 @@ function App() {
                 `px-3 py-1.5 rounded-md text-sm font-medium transition ${
                   isActive
                     ? "bg-black text-white"
-                    : "text-gray-600 hover:bg-gray-100"
+                    : "text-gray-300 hover:bg-gray-100 hover:text-black"
                 }`
               }
             >
