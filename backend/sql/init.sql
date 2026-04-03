@@ -13,6 +13,8 @@ CREATE TABLE IF NOT EXISTS api_monitors (
   url TEXT NOT NULL,
   normalized_url TEXT NOT NULL,
   interval_seconds INTEGER NOT NULL,
+  alert_email TEXT,
+  last_status TEXT,
   created_at TIMESTAMP DEFAULT NOW(),
   UNIQUE (user_id, normalized_url)
 );

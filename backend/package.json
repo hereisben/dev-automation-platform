@@ -29,7 +29,8 @@
     "jsonwebtoken": "^9.0.3",
     "openai": "^6.27.0",
     "pg": "^8.20.0",
-    "puppeteer": "^24.38.0"
+    "puppeteer": "^24.38.0",
+    "resend": "^6.10.0"
   },
   "devDependencies": {
     "concurrently": "^9.2.1",

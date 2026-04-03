@@ -134,9 +134,23 @@ router.post("/", authMiddleware, monitorCreateLimiter, async (req, res) => {
         });
       }
 
+      const userResult = await pool.query(
+        `SELECT email FROM users WHERE id = $1`,
+        [req.user.userId],
+      );
+
+      const alertEmail = userResult.rows[0]?.email || null;
+
       const insertResult = await pool.query(
-        `INSERT INTO api_monitors (user_id ,url, normalized_url, interval_seconds) VALUES ($1, $2, $3, $4) RETURNING id`,
-        [req.user.userId, url, normalizedUrl, intervalSeconds],
+        `INSERT INTO api_monitors (user_id ,url, normalized_url, interval_seconds, alert_email, last_status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
+        [
+          req.user.userId,
+          url,
+          normalizedUrl,
+          intervalSeconds,
+          alertEmail,
+          null,
+        ],
       );
 
       monitorId = insertResult.rows[0].id;
