@@ -1,4 +1,5 @@
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 import express from "express";
 import pool from "../config/db.js";
 import authMiddleware from "../middleware/authMiddleware.js";
@@ -67,6 +68,41 @@ router.post("/register", authLimiter, async (req, res) => {
     console.error(`register error:`, err || err.message);
     return res.status(500).json({
       error: `failed to register user`,
+    });
+  }
+});
+
+router.post("/guest", async (req, res) => {
+  try {
+    const randomPart = Math.random().toString(36).slice(2, 8);
+    const timestamp = Date.now();
+
+    const name = `Guest-${randomPart.toUpperCase()}`;
+    const email = `guest-${timestamp}-${randomPart}@guest.ben`;
+    const rawPassword = crypto.randomUUID();
+
+    const passwordHash = await bcrypt.hash(rawPassword, 10);
+
+    const result = await pool.query(
+      `INSERT INTO users (name, email, password_hash, is_guest)
+      VALUES ($1, $2, $3, $4)
+      RETURNING id, name, email, is_guest, created_at`,
+      [name, email, passwordHash, true],
+    );
+
+    const user = result.rows[0];
+
+    const token = generateToken(user);
+
+    return res.status(201).json({
+      message: `Guest account created successfully`,
+      token,
+      user,
+    });
+  } catch (err) {
+    console.error(`guest auth error:`, err);
+    return res.status(500).json({
+      error: `Failed to create guest account`,
     });
   }
 });
