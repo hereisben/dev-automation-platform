@@ -1,7 +1,7 @@
 # 🚀 Dev Automation Platform
 
-> A full-stack SaaS platform for developer automation tools
-> Built with a modern React frontend and a distributed Node.js backend using async job processing
+*A full-stack SaaS platform for developer automation tools*  
+*Built with a modern React frontend and a distributed Node.js backend using async job processing*
 
 ---
 
