@@ -1,203 +1,160 @@
-Dev Automation Platform
-Project Overview
-Dev Automation Platform is a developer-focused tool that provides automation utilities for common development tasks.
-The platform currently includes three core capabilities:
+# 🚀 Dev Automation Platform
 
-Screenshot Capture
-API Monitoring with AI Incident Summary
-AI Commit Message Generator
+> A full-stack SaaS platform for developer automation tools
+> Built with a modern React frontend and a distributed Node.js backend using async job processing
 
-The project is designed to simulate a small SaaS-style backend system with asynchronous task processing using queues and workers.
-The goal of the project is to practice building production-style backend architecture, including job queues, worker services, monitoring tasks, and AI-assisted developer tools.
+---
 
-Core Features
-1. Screenshot Capture
-This feature allows users to capture screenshots of web pages.
-Workflow:
-User submits a URL →
-Backend creates a screenshot task →
-Task is added to a job queue →
-Screenshot worker processes the task using Puppeteer →
-Screenshot image is stored and returned.
-Example request:
-POST /api/screenshot
-Body:
-{
-"url": "https://example.com"
-}
-Response:
-{
-"status": "processing",
-"taskId": "123"
-}
-Users can later retrieve the screenshot result from the dashboard.
+## 🌐 Live Website
 
-2. API Monitor
-This feature allows users to monitor API endpoints periodically.
-Users can provide:
+👉 https://dev-automation-platform.vercel.app/
 
-API endpoint URL
-Monitoring interval
+---
 
-Example:
-Monitor https://api.example.com/users every 10 minutes.
-The system periodically checks the endpoint and stores monitoring data:
+## ✨ Features
 
-status code
-response time
-response snapshot
+### 🛰️ API Monitoring
 
-Monitoring data is saved for historical analysis.
+* Monitor APIs with custom intervals
+* Detect incidents (errors, slow responses, failures)
+* Generate AI-powered summaries
+* Send email alerts on status changes (UP ↔ DOWN)
+* View monitoring history in dashboard
 
-3. AI Incident Summary
-When the API monitor detects issues such as:
+### 📸 Screenshot Capture
 
-server errors
-response structure changes
-repeated failures
+* Capture full-page screenshots of any website
+* Process jobs asynchronously via worker queue
+* Store images in AWS S3 for distributed access
+* Track job status in real time
 
-The system generates an AI-based summary explaining the incident.
-Example AI output:
-"The API started returning 500 errors at 10:42 AM.
-This may indicate a backend deployment issue or a database connection problem.
-Suggested action: check recent deployments or server logs."
-The goal of this feature is to help developers quickly understand monitoring alerts.
+### 🤖 AI Commit Generator
 
-4. AI Commit Message Generator
-This feature generates commit messages from git diff input.
-Workflow:
-User pastes a git diff →
-Backend sends the diff to an AI model →
-AI generates a suggested commit message.
-Example input:
-git diff
-Example output:
-feat(api): add request validation middleware
-This tool helps developers write clearer commit messages and maintain consistent commit history.
+* Generate structured commit messages from git diff
+* Enforce conventional commit format
+* Includes fallback logic for reliability
 
-System Architecture
-The system follows an asynchronous task processing model.
-High-level architecture:
-Frontend (React dashboard)
-↓
-Backend API (Node.js / Express)
-↓
-Job Queue (Redis + BullMQ)
-↓
-Workers
+### 🔐 Authentication
 
-Screenshot Worker
-API Monitor Worker
-AI Worker
+* JWT-based authentication
+* Per-user data isolation
+* Guest login for quick access
 
-↓
-Database
+---
 
-task history
-screenshot results
-monitoring logs
-incident summaries
+## 🏗️ Architecture
 
+```
+Frontend (React + TypeScript)
+        ↓
+Backend API (Node.js + Express)
+        ↓
+Redis Queue (BullMQ)
+        ↓
+Worker Services
+        ↓
+PostgreSQL
+```
 
-Task Processing Flow
-General flow for automation tasks:
-User submits request
-↓
-Backend validates request
-↓
-Task added to queue
-↓
-Worker processes task
-↓
-Result stored in database
-↓
-Frontend dashboard displays result
+### 🔑 Key Concepts
 
-Technology Stack
-Frontend
-React
-Vite
-Tailwind CSS
-Backend
-Node.js
-Express
-Infrastructure
-Redis
-BullMQ
-Workers
-Puppeteer (screenshot capture)
-Cron jobs (API monitoring)
-AI Integration
-LLM API for commit generation and incident summaries
-Database
-PostgreSQL or MongoDB
-Deployment
-Docker (planned)
+* Distributed backend with separate worker services
+* Asynchronous job processing using Redis + BullMQ
+* Production-safe file storage using AWS S3
+* Real-time UI updates via polling
+* Multi-user system with secure data isolation
 
-Data Model (Simplified)
-tasks
+---
 
-id
-type
-status
-created_at
+## ⚙️ Tech Stack
 
-task_results
+### 🎨 Frontend
 
-task_id
-result
-completed_at
+* React
+* TypeScript
+* Tailwind CSS
+* shadcn/ui
+* React Query
 
-api_monitors
+### 🧠 Backend
 
-id
-url
-interval
-last_checked
+* Node.js
+* Express
+* PostgreSQL
+* Redis
+* BullMQ
+* Puppeteer
 
-monitor_logs
+### ☁️ Infrastructure
 
-monitor_id
-status_code
-response_time
-response_body
-created_at
+* AWS S3
+* Railway (API, workers, Redis, PostgreSQL)
+* Vercel (frontend)
 
-incidents
+### 🤖 AI
 
-monitor_id
-summary
-severity
-created_at
+* Groq API (OpenAI-compatible)
 
+---
 
-Project Goals
-This project focuses on practicing real-world backend architecture concepts:
+## 🔄 System Flow
 
-asynchronous task processing
-job queues and workers
-automation tools for developers
-AI-assisted developer workflows
-SaaS-style backend system design
+### 📸 Screenshot Flow
 
+```
+User submits URL
+→ Job added to Redis queue
+→ Worker processes with Puppeteer
+→ Upload to S3
+→ UI polls and displays result
+```
 
-Planned Development Order
+### 🛰️ Monitoring Flow
 
-Backend API setup
-Redis + BullMQ queue
-Screenshot worker
-API monitoring system
-AI commit generator
-AI incident summary
-React dashboard
-Deployment
+```
+User creates monitor
+→ Scheduled job runs
+→ Worker checks API
+→ Result stored in PostgreSQL
+→ Incident detected + summarized
+→ Email alert sent
+```
 
+---
 
-Future Improvements
-Possible future features:
+## 🛡️ Production Considerations
 
-authentication system
-rate limiting
-alert notifications
-monitoring dashboards
-team collaboration
+* Rate limiting to prevent abuse
+* Per-user quotas for monitors and jobs
+* Ownership checks for secure access
+* Async processing to avoid blocking API
+* Fallback handling for AI failures
+* Distributed storage (S3) for multi-service setup
+
+---
+
+## 🌍 Deployment
+
+* Frontend → Vercel
+* Backend API → Railway
+* Workers → Railway
+* Database → Railway PostgreSQL
+* Queue → Railway Redis
+
+---
+
+## 📌 What I Learned
+
+* Designing async systems with queues and workers
+* Building distributed backend architecture
+* Handling real production issues (CORS, worker isolation, storage)
+* Integrating AI features into real applications
+* Deploying and debugging fullstack systems
+
+---
+
+## 📎 Repository
+
+🔗 https://github.com/hereisben/dev-automation-platform
+
+---
